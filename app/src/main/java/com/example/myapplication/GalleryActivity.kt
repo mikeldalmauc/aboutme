@@ -1,14 +1,19 @@
 package com.example.myapplication
 
+import GalleryViewModel
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,14 +27,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MikelGreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
@@ -38,49 +43,32 @@ class GalleryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             MyApplicationTheme {
-                Gallery()
+                val galleryViewModel: GalleryViewModel = viewModel()
+                Gallery(galleryViewModel)
             }
         }
     }
 }
 
-fun sampleArtworks(): List<Artwork> {
-    return listOf(
-        Artwork(
-            "Obra 1",
-            "Título 1",
-            "Descripción de la obra 1",
-            "2023-01-01",
-            ArtworkStyle.WATERCOLOUR
-        ),
-        Artwork(
-            "Obra 2",
-            "Título 2",
-            "Descripción de la obra 2",
-            "2023-02-01",
-            ArtworkStyle.DIGITAL
-        ),
-        Artwork("Obra 3", "Título 3", "Descripción de la obra 3", "2023-03-01", ArtworkStyle.INK)
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GalleryPreview() {
-    Gallery()
+    val galleryViewModel: GalleryViewModel = viewModel() // Crear un ViewModel para la vista previa
+
+    Gallery( galleryViewModel)
 }
 
 @Composable
-fun Gallery() {
+fun Gallery(viewModel: GalleryViewModel) {
     val navController = rememberNavController()
-    val isSingleColumn = remember { mutableStateOf(true) } // Para alternar entre una y dos columnas
 
     Scaffold(
         modifier = Modifier,
         topBar = {
-            GalleryTopBar(isSingleColumn)
+            GalleryTopBar(viewModel.isSingleColumn)
         },
         bottomBar = {
             BottomNavBar(navController)
@@ -89,7 +77,7 @@ fun Gallery() {
             AddFloatingButton()
         }
     ) { innerPadding ->
-        GalleryContent(innerPadding, isSingleColumn, sampleArtworks())
+        GalleryContent(innerPadding, viewModel.isSingleColumn, viewModel.artworks.value)
     }
 }
 
@@ -137,18 +125,43 @@ fun GalleryContent(
 
 @Composable
 fun ArtworkCard(artwork: Artwork) {
+
     Box(
         modifier = Modifier
             .padding(8.dp)
             .background(Color.LightGray)
-            .fillMaxSize()
+            .fillMaxWidth() // Ajustar el tamaño de la tarjeta
     ) {
-        Text(
-            text = "${artwork.title} - ${artwork.style.name}",
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Imagen de la obra de arte
+            Image(
+                painter = painterResource(id = artwork.imageResId),
+                contentDescription = "Imagen de la obra de arte",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp) // Ajusta el tamaño según lo que desees
+                    .padding(8.dp)
+            )
+
+            // Texto con título y estilo de la obra
+            Text(
+                text = artwork.title,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+
+            Text(
+                text = artwork.style.name,
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            )
+        }
     }
 }
+
 
 @Composable
 fun AddFloatingButton() {

@@ -5,7 +5,8 @@ data class Artwork(
     val title: String,
     val description: String,
     val creationDate: String,
-    val style: ArtworkStyle
+    val style: ArtworkStyle,
+    val imageResId: Int // ID del recurso de la imagen (JPG)
 )
 
 enum class ArtworkStyle {
