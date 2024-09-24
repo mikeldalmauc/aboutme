@@ -65,14 +65,6 @@ class GalleryActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GalleryPreview() {
-    val galleryViewModel: GalleryViewModel = viewModel() // Crear un ViewModel para la vista previa
-
-    Gallery( galleryViewModel)
-}
-
 @Composable
 fun Gallery(viewModel: GalleryViewModel) {
     val navController = rememberNavController()
