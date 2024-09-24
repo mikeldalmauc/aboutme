@@ -1,7 +1,6 @@
 package com.example.myapplication
 
 import android.content.Intent
-import android.icu.text.IDNA.Info
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,11 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -92,8 +91,7 @@ fun TopBar() {
         // Título de la app
         Text(
             text = "Main Activiy",
-            color = Color.DarkGray,
-            fontSize = 20.sp
+            style = MaterialTheme.typography.titleLarge
         )
     }
 }

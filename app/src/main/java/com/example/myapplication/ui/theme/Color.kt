@@ -11,3 +11,4 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val MikelGreen = Color(0xFF8BC34A)
+val MikelGold = Color(0xFFE5A65E)

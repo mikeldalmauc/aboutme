@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,8 +80,8 @@ fun SettingsTopBar() {
         // Título de la app
         Text(
             text = "Settings",
-            color = Color.DarkGray,
-            fontSize = 20.sp
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Black
         )
 
     }

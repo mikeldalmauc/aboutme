@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -115,8 +116,7 @@ fun AboutTopBar() {
         // Título de la app
         Text(
             text = "About Me",
-            color = Color.DarkGray,
-            fontSize = 20.sp
+            style = MaterialTheme.typography.titleLarge
         )
 
         // Ícono para enviar un correo
@@ -136,10 +136,9 @@ fun AboutTopBar() {
                 context.startActivity(intent) // Inicia la aplicación de correo
             }
         }) {
-            Icon(
-                imageVector = Icons.Default.Email, // Ícono de correo
+            Image(
+                painter = painterResource(id = R.drawable.favicon_mikel),
                 contentDescription = "Enviar email",
-                tint = Color.DarkGray, // Color del ícono
                 modifier = Modifier
                     .size(35.dp) // Padding del ícono
             )

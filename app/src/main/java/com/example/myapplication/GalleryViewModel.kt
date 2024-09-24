@@ -45,7 +45,7 @@ fun sampleArtworks(): List<Artwork> {
         ),
         Artwork(
             "Malenia",
-            "Malean",
+            "Malenia",
             "Fan art of Malenia from Elden Ring",
             "2023-02-01",
             ArtworkStyle.DIGITAL,
