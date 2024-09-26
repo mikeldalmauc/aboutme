@@ -2,10 +2,6 @@ package com.example.myapplication
 
 import GalleryViewModel
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,10 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -30,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -42,48 +35,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 import com.example.myapplication.ui.theme.MikelGold
 import com.example.myapplication.ui.theme.MikelGreen
-import com.example.myapplication.ui.theme.MyApplicationTheme
 
-class GalleryActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
-        setContent {
-            MyApplicationTheme {
-                val galleryViewModel: GalleryViewModel = viewModel()
-                Gallery(galleryViewModel)
-            }
-        }
-    }
-}
-
-@Composable
-fun Gallery(viewModel: GalleryViewModel) {
-    val navController = rememberNavController()
-
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            GalleryTopBar(viewModel.isSingleColumn)
-        },
-        bottomBar = {
-            BottomNavBar(navController)
-        },
-        floatingActionButton = {
-            AddFloatingButton()
-        }
-    ) { innerPadding ->
-        GalleryContent(innerPadding, viewModel.isSingleColumn, viewModel.artworks.value)
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,24 +66,28 @@ fun GalleryTopBar(isSingleColumn: MutableState<Boolean>) {
 }
 
 @Composable
-fun GalleryContent(
-    paddingValues: PaddingValues,
-    isSingleColumn: MutableState<Boolean>,
-    artworks: List<Artwork>
-) {
-    LazyVerticalGrid(
-        columns = if (isSingleColumn.value) GridCells.Fixed(1) else GridCells.Fixed(2), // Cambiar el número de columnas
+fun GalleryScreen(innerPadding: PaddingValues,  galleryViewModel: GalleryViewModel, navController: NavController) {
+    val list = galleryViewModel.artworks.value
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0.1f, 0.1f, 0.1f, 0.9f))
-            .padding(paddingValues)
+            .padding(innerPadding)
     ) {
-        items(
-            count = artworks.size, // Número de elementos en la lista
-            key = { index -> artworks[index].name }, // Clave única para cada elemento
-        ) { index ->
-            val artwork = artworks[index]
-            ArtworkCard(artwork)
+        LazyVerticalGrid(
+            columns = if (galleryViewModel.isSingleColumn.value) GridCells.Fixed(1) else GridCells.Fixed(
+                2
+            ), // Cambiar el número de columnas
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0.1f, 0.1f, 0.1f, 0.9f))
+        ) {
+            items(
+                count = list.size, // Número de elementos en la lista
+                key = { index -> list[index].name }, // Clave única para cada elemento
+            ) { index ->
+                val artwork = list[index]
+                ArtworkCard(artwork)
+            }
         }
     }
 

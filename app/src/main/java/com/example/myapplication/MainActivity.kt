@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import GalleryViewModel
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +37,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.launch
@@ -61,19 +68,39 @@ fun MainContentPreview() {
 @Composable
 fun MainContent() {
     val navController = rememberNavController()
-
+    val galleryViewModel: GalleryViewModel = viewModel()
+    val current = navController.currentBackStackEntryAsState().value?.destination?.route
     Scaffold(
-        modifier = Modifier,
-        topBar = {
-            TopBar()
-        },
-        bottomBar = {
+        modifier = Modifier
+        ,topBar = {
+            when(current) {
+                "gallery" -> GalleryTopBar(galleryViewModel.isSingleColumn)
+                "settings" -> SettingsTopBar()
+                "home" -> TopBar()
+                "info" -> AboutTopBar()
+                else -> TopBar()
+            }
+        }
+        ,bottomBar = {
             BottomNavBar(navController)
         }
+        ,floatingActionButton = {
+            when(current) {
+                "gallery" -> AddFloatingButton()
+                "info" -> ShareFloatingButton()
+                else -> {}
+            }
+        }
     ) { innerPadding ->
-        MainBody(innerPadding)
+            NavHost(navController = navController, startDestination = "home") {
+                composable("home") { HomeScreen(innerPadding, navController) }
+                composable("info") { InfoScreen(innerPadding, navController) }
+                composable("gallery") { GalleryScreen(innerPadding, galleryViewModel, navController) }
+                composable("settings") { SettingsScreen(innerPadding, navController) }
+            }
     }
 }
+
 
 @Composable
 fun TopBar() {
@@ -98,48 +125,49 @@ fun TopBar() {
 
 @Composable
 fun BottomNavBar(navController: NavHostController) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val currentActivity = context.javaClass.simpleName
 
     NavigationBar {
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-            selected = currentActivity == "MainActivity", // Marcar como seleccionado si es MainActivity
+            selected = navController.currentBackStackEntry?.destination?.route == "home",
             onClick = {
-                // Navegar a la actividad principal (MainActivity)
-                coroutineScope.launch {
-                    context.startActivity(Intent(context, MainActivity::class.java))
+                navController.navigate("home") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Info, contentDescription = "Info") },
-            selected = currentActivity == "InfoActivity", // Marcar como seleccionado si es MainActivity
+            selected = navController.currentBackStackEntry?.destination?.route == "info",
             onClick = {
-                // Navegar a la primera actividad (FirstActivity)
-                coroutineScope.launch {
-                    context.startActivity(Intent(context, InfoActivity::class.java))
+                navController.navigate("info") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
         NavigationBarItem(
             icon = { Icon(painterResource(R.drawable.baseline_gray_brush_24), contentDescription = "Gallery") },
-            selected = currentActivity == "GalleryActivity", // Marcar como seleccionado si es MainActivity
+            selected = navController.currentBackStackEntry?.destination?.route == "gallery",
             onClick = {
-                // Navegar a la segunda actividad (SecondActivity)
-                coroutineScope.launch {
-                    context.startActivity(Intent(context, GalleryActivity::class.java))
+                navController.navigate("gallery") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-            selected = currentActivity == "SettingsActivity", // Marcar como seleccionado si es MainActivity
+            selected = navController.currentBackStackEntry?.destination?.route == "settings",
             onClick = {
-                // Navegar a la tercera actividad (ThirdActivity)
-                coroutineScope.launch {
-                    context.startActivity(Intent(context, SettingsActivity::class.java))
+                navController.navigate("settings") {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             }
         )
@@ -147,13 +175,13 @@ fun BottomNavBar(navController: NavHostController) {
 }
 
 @Composable
-fun MainBody(paddingValues: PaddingValues) {
+fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
+    // LazyColumn con fondo semi-transparente
     Box(
         modifier = Modifier
-            .padding(paddingValues = paddingValues)
             .fillMaxSize()
+            .padding(innerPadding)
     ) {
-        // LazyColumn con fondo semi-transparente
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

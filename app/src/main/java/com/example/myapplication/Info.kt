@@ -3,10 +3,6 @@ package com.example.myapplication
 import android.content.Intent
 import android.graphics.BlurMaskFilter
 import android.net.Uri
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -29,13 +25,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,52 +47,35 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 import com.example.myapplication.ui.theme.MikelGreen
-import com.example.myapplication.ui.theme.MyApplicationTheme
 
-class InfoActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MyApplicationTheme {
-                AboutMe()
+
+@Composable
+fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        // LazyColumn con fondo semi-transparente
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0.1f, 0.1f, 0.1f, 0.9f)) // Fondo semi-transparente
+                .padding(vertical = 20.dp)
+        ) {
+            item {
+                Profile()
+                About()
+                Social()
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun AboutMePreview() {
-    AboutMe()
-}
-
-@Composable
-fun AboutMe() {
-    val navController = rememberNavController()
-
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            AboutTopBar()
-        },
-        bottomBar = {
-            BottomNavBar(navController)
-        },
-        floatingActionButton = {
-            ShareFloatingButton()
-        }
-    ) { innerPadding ->
-        About(innerPadding)
-    }
-}
+    }}
 
 @Composable
 fun AboutTopBar() {
@@ -173,31 +150,6 @@ fun ShareFloatingButton() {
         )
     }
 }
-
-
-@Composable
-fun About(paddingValues: PaddingValues) {
-    Box(
-        modifier = Modifier
-            .padding(paddingValues = paddingValues)
-            .fillMaxSize()
-    ) {
-        // LazyColumn con fondo semi-transparente
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0.1f, 0.1f, 0.1f, 0.9f)) // Fondo semi-transparente
-                .padding(vertical = 20.dp)
-        ) {
-            item {
-                Profile()
-                About()
-                Social()
-            }
-        }
-    }
-}
-
 
 @Composable
 fun Profile() {

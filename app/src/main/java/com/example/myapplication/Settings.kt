@@ -1,9 +1,5 @@
 package com.example.myapplication
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,54 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.navigation.NavController
 
-class SettingsActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MyApplicationTheme {
-                Settings()
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsPreview() {
-    Settings()
-}
-
-
-@Composable
-fun Settings() {
-    val navController = rememberNavController()
-
-    Scaffold(
-        modifier = Modifier,
-        topBar = {
-            SettingsTopBar()
-        },
-        bottomBar = {
-            BottomNavBar(navController)
-        }
-    ) { innerPadding ->
-        SettingsBody(innerPadding)
-    }
-}
 
 @Composable
 fun SettingsTopBar() {
@@ -89,20 +47,20 @@ fun SettingsTopBar() {
 
 
 @Composable
-fun SettingsBody(paddingValues: PaddingValues) {
+fun SettingsScreen(innerPadding: PaddingValues, navController: NavController) {
+    // LazyColumn con fondo semi-transparente
     Box(
         modifier = Modifier
-            .padding(paddingValues = paddingValues)
             .fillMaxSize()
+            .padding(innerPadding)
     ) {
-        // LazyColumn con fondo semi-transparente
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0.1f, 0.1f, 0.1f, 0.9f)) // Fondo semi-transparente
                 .padding(vertical = 20.dp)
         ) {
-            item{
+            item {
                 Text(
                     text = "Settings Body",
                     color = Color.DarkGray,
