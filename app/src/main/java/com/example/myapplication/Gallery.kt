@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -39,8 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.myapplication.ui.theme.MikelGold
-import com.example.myapplication.ui.theme.MikelGreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,8 +48,9 @@ fun GalleryTopBar(isSingleColumn: MutableState<Boolean>) {
     androidx.compose.material3.TopAppBar(
         title = {
             Text("Galería"
-                , style = MaterialTheme.typography.titleLarge,
-                )
+                , style = MaterialTheme.typography.titleLarge
+                , color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
                 },
         actions = {
             IconButton(onClick = {
@@ -58,10 +58,15 @@ fun GalleryTopBar(isSingleColumn: MutableState<Boolean>) {
             }) {
                 Icon(
                     painterResource(id = if (isSingleColumn.value) R.drawable.baseline_view_list_24 else R.drawable.baseline_grid_view_24),
-                    contentDescription = "Cambiar vista"
+                    contentDescription = "Cambiar vista",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
+        , colors = topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
     )
 }
 
@@ -107,8 +112,7 @@ fun ArtworkCard(artwork: Artwork) {
         modifier = Modifier
             .padding(6.dp) // Padding alrededor de la tarjeta
             .shadow(8.dp, RoundedCornerShape(16.dp)) // Sombra con bordes redondeados
-            .background(Color.White, RoundedCornerShape(16.dp)) // Fondo blanco y bordes redondeados
-            .border(2.dp, MikelGold, RoundedCornerShape(16.dp)) // Borde fino
+
             .fillMaxWidth() // Ajustar el tamaño de la tarjeta
     ) {
         Column () {
@@ -173,13 +177,12 @@ fun AddFloatingButton() {
     val context = LocalContext.current
     IconButton(
         onClick = {
-            val intent = Intent(
+            /*val intent = Intent(
                 context,
                 CreateGalleryItemActivity::class.java
             ) // Nueva actividad para crear o editar
-            context.startActivity(intent)
+            context.startActivity(intent)*/
         }, modifier = Modifier
-            .background(MikelGreen, CircleShape) // Fondo del botón
             .padding(2.dp) // Padding del botón
     ) {
         Icon(

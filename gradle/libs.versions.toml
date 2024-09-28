@@ -19,6 +19,7 @@ navigationCompose = "2.8.1"
 activity = "1.9.2"
 navigationRuntimeKtx = "2.8.0"
 uiTextGoogleFonts = "1.7.2"
+tvMaterial = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +47,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

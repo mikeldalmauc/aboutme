@@ -26,11 +26,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.example.myapplication.ui.theme.MikelGreen
 
 
 @Composable
@@ -66,7 +68,7 @@ fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0.1f, 0.1f, 0.1f, 0.9f)) // Fondo semi-transparente
+                .background(MaterialTheme.colorScheme.background)
                 .padding(vertical = 20.dp)
         ) {
             item {
@@ -77,50 +79,59 @@ fun InfoScreen(innerPadding: PaddingValues, navController: NavController) {
         }
     }}
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutTopBar() {
     val context = LocalContext.current // Access the current context
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth() // Barra que ocupa todo el ancho
-            .background(Color(94, 94, 94, 37)) // Color de fondo personalizado
-            .padding(16.dp) // Padding de la barra
-            .statusBarsPadding() // Add padding to avoid overlapping with system bar
-        , verticalAlignment = Alignment.CenterVertically, // Centrar el contenido verticalmente
-        horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos equitativamente
-    ) {
-        // Título de la app
-        Text(
-            text = "About Me",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        // Ícono para enviar un correo
-        IconButton(onClick = {
-            // Intent para abrir la aplicación de correo
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:") // Solo abre aplicaciones de correo
-                putExtra(
-                    Intent.EXTRA_EMAIL,
-                    arrayOf("mikeldalmauc@gmail.com")
-                ) // Email destinatario
-                putExtra(Intent.EXTRA_SUBJECT, "He visitado tu perfil!") // Asunto del correo
-            }
-
-            // Verifica si hay alguna aplicación que pueda manejar el intent
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(intent) // Inicia la aplicación de correo
-            }
-        }) {
-            Image(
-                painter = painterResource(id = R.drawable.favicon_mikel),
-                contentDescription = "Enviar email",
+    TopAppBar(
+        colors = topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        ),
+        title = {
+            Row(
                 modifier = Modifier
-                    .size(35.dp) // Padding del ícono
-            )
+                    .fillMaxWidth() // Barra que ocupa todo el ancho
+                    .padding(16.dp) // Padding de la barra
+                    .statusBarsPadding() // Add padding to avoid overlapping with system bar
+                , verticalAlignment = Alignment.CenterVertically, // Centrar el contenido verticalmente
+                horizontalArrangement = Arrangement.SpaceBetween // Distribuye los elementos equitativamente
+            ) {
+                // Título de la app
+                Text(
+                    text = "About Me",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                // Ícono para enviar un correo
+                IconButton(onClick = {
+                    // Intent para abrir la aplicación de correo
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:") // Solo abre aplicaciones de correo
+                        putExtra(
+                            Intent.EXTRA_EMAIL,
+                            arrayOf("mikeldalmauc@gmail.com")
+                        ) // Email destinatario
+                        putExtra(Intent.EXTRA_SUBJECT, "He visitado tu perfil!") // Asunto del correo
+                    }
+
+                    // Verifica si hay alguna aplicación que pueda manejar el intent
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent) // Inicia la aplicación de correo
+                    }
+                }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.favicon_mikel),
+                        contentDescription = "Enviar email",
+                        modifier = Modifier
+                            .size(35.dp) // Padding del ícono
+                        , colorFilter = ColorFilter.lighting(Color.White, MaterialTheme.colorScheme.onSecondaryContainer)
+                    )
+                }
+            }
         }
-    }
+    )
 }
 
 @Composable
@@ -140,13 +151,14 @@ fun ShareFloatingButton() {
             // Start the sharing activity
             startActivity(context, Intent.createChooser(shareIntent, "Share via"), null)
         }, modifier = Modifier
-            .background(MikelGreen, CircleShape) // Fondo del botón
             .padding(2.dp) // Padding del botón
+            .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .clip(CircleShape) // Añadir bordes redondeados al botón
     ) {
         Icon(
             imageVector = Icons.Default.Share,
             contentDescription = "Share",
-            tint = Color.Black
+            tint = MaterialTheme.colorScheme.onTertiaryContainer
         )
     }
 }
@@ -163,28 +175,28 @@ fun Profile() {
             modifier = Modifier
                 .size(220.dp)
                 .clip(CircleShape)
-                .border(BorderStroke(6.dp, Color.White), shape = CircleShape)
+                .border(BorderStroke(6.dp, MaterialTheme.colorScheme.tertiary), shape = CircleShape)
         )
         HorizontalDivider(
-            color = Color.DarkGray, thickness = 1.dp, modifier = Modifier
+            color = MaterialTheme.colorScheme.inversePrimary, thickness = 1.dp, modifier = Modifier
                 .padding(vertical = 10.dp)
         )
         Text(
             text = "Mikel Dalmau",
             fontSize = 24.sp,
-            color = Color.White,
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 10.dp)
         )
-        HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
+        HorizontalDivider(color = MaterialTheme.colorScheme.inversePrimary, thickness = 1.dp)
         Text(
             text = "I am a former Software Engineer now teaching the way of the keyboard to young guns " +
                     "with a passion for sports, all kinds of food, and painting.",
             fontSize = 16.sp,
-            color = Color.White,
             textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp),
@@ -226,7 +238,7 @@ fun Subject(@DrawableRes icon: Int, title: String, body: String?) {
                 .size(60.dp) // Ajusta el tamaño del ícono según el alto que desees
                 .align(Alignment.CenterVertically)// Alinea verticalmente el ícon
                 .offset(x = 5.dp, y = 0.dp), // Ajusta la posición del ícono
-            colorFilter = ColorFilter.lighting(Color.White, Color.White)
+            colorFilter = ColorFilter.lighting(Color.White, MaterialTheme.colorScheme.tertiary)
         )
         Column(
             verticalArrangement = Arrangement.SpaceEvenly,
@@ -235,14 +247,12 @@ fun Subject(@DrawableRes icon: Int, title: String, body: String?) {
             Text(
                 text = title,
                 fontSize = 24.sp,
-                color = Color.White,
                 textAlign = TextAlign.Left,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
                 text = body ?: "",
                 fontSize = 16.sp,
-                color = Color.White,
                 textAlign = TextAlign.Left,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -270,7 +280,7 @@ fun Social() {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(linkedinUrl))
                     context.startActivity(intent)
                 },
-            colorFilter = ColorFilter.lighting(Color.White, Color.White)
+            colorFilter = ColorFilter.lighting(Color.White, MaterialTheme.colorScheme.tertiary)
         )
         Image(
             painter = painterResource(id = R.drawable.ic_linkedin),
@@ -282,7 +292,7 @@ fun Social() {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(linkedinUrl))
                     context.startActivity(intent)
                 },
-            colorFilter = ColorFilter.lighting(Color.White, Color.White)
+            colorFilter = ColorFilter.lighting(Color.White, MaterialTheme.colorScheme.tertiary)
         )
         Image(
             painter = painterResource(id = R.drawable.ic_instagram),
@@ -294,7 +304,7 @@ fun Social() {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(linkedinUrl))
                     context.startActivity(intent)
                 },
-            colorFilter = ColorFilter.lighting(Color.White, Color.White)
+            colorFilter = ColorFilter.lighting(Color.White, MaterialTheme.colorScheme.tertiary)
         )
     }
 }
