@@ -138,29 +138,34 @@ fun AboutTopBar() {
 fun ShareFloatingButton() {
     val context = LocalContext.current
 
-    // Íconos o acciones en la parte derecha
-    IconButton(
-        onClick = {
-            // Create an intent to share a link
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_SUBJECT, "Check out my website!")
-                putExtra(Intent.EXTRA_TEXT, "http://www.mikeldalmauc.com") // Your website URL
-            }
-
-            // Start the sharing activity
-            startActivity(context, Intent.createChooser(shareIntent, "Share via"), null)
-        }, modifier = Modifier
-            .padding(2.dp) // Padding del botón
+    Box(
+        modifier = Modifier
+            .padding(2.dp)
+            .clip(CircleShape) // Clipa el contenedor completo
             .background(MaterialTheme.colorScheme.tertiaryContainer)
-            .clip(CircleShape) // Añadir bordes redondeados al botón
     ) {
-        Icon(
-            imageVector = Icons.Default.Share,
-            contentDescription = "Share",
-            tint = MaterialTheme.colorScheme.onTertiaryContainer
-        )
+        IconButton(
+            onClick = {
+                // Create an intent to share a link
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, "Check out my website!")
+                    putExtra(Intent.EXTRA_TEXT, "http://www.mikeldalmauc.com") // Your website URL
+                }
+
+                // Start the sharing activity
+                startActivity(context, Intent.createChooser(shareIntent, "Share via"), null)
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share",
+                tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
+
 }
 
 @Composable

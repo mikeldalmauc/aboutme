@@ -2,6 +2,7 @@ package com.example.myapplication
 
 import GalleryViewModel
 import android.content.Intent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,10 +21,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
@@ -91,7 +95,7 @@ fun GalleryScreen(innerPadding: PaddingValues,  galleryViewModel: GalleryViewMod
                 key = { index -> list[index].name }, // Clave única para cada elemento
             ) { index ->
                 val artwork = list[index]
-                ArtworkCard(artwork)
+                ArtworkCardNew(artwork)
             }
         }
     }
@@ -171,6 +175,83 @@ fun ArtworkCard(artwork: Artwork) {
         }
     }
 }
+
+@Composable
+fun ArtworkCardNew(artwork: Artwork) {
+    // Selección del ícono según el estilo de la obra
+    val iconResId = when (artwork.style) {
+        ArtworkStyle.WATERCOLOUR -> R.drawable.outline_palette_24
+        ArtworkStyle.DIGITAL -> R.drawable.outline_video_stable_24
+        ArtworkStyle.INK -> R.drawable.outline_ink_pen_24
+    }
+
+    // Uso de la tarjeta de Material Design
+    OutlinedCard(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(8.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondaryContainer),
+        modifier = Modifier
+            .padding(6.dp) // Padding alrededor de la tarjeta
+            .fillMaxWidth() // Ajustar el tamaño de la tarjeta
+    ) {
+        Column {
+            // Contenedor para superponer el icono sobre la imagen
+            Box {
+                // Imagen de la obra de arte
+                Image(
+                    painter = painterResource(id = artwork.imageResId),
+                    contentDescription = "Imagen de la obra de arte",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth() // Llenar el ancho
+                        .aspectRatio(1f) // Relación de aspecto 1:1 para que sea cuadrada
+                        .clip(RoundedCornerShape(16.dp)) // Redondear la imagen
+                )
+
+                // Fondo para el icono (recuadro gris oscuro)
+                Box(
+                    modifier = Modifier
+                        .size(36.dp) // Tamaño del recuadro
+                        .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(8.dp)) // Color gris oscuro con bordes redondeados
+                        .align(Alignment.TopEnd) // Alinear en la esquina superior derecha
+                        .padding(8.dp) // Padding para ajustar la posición
+                ) {
+                    // Icono superpuesto
+                    Icon(
+                        painter = painterResource(id = iconResId),
+                        contentDescription = "Icono del estilo de la obra de arte",
+                        modifier = Modifier
+                            .size(24.dp) // Tamaño del icono
+                            .align(Alignment.Center), // Centrar el icono dentro del recuadro
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer // Color del icono
+                    )
+                }
+            }
+
+            // Fondo para el titulo
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth() // Llenar el ancho
+                    .background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp)) // Color gris oscuro con bordes redondeados
+                    .padding(8.dp) // Padding para ajustar la posición
+            ) {
+                // Título de la obra de arte
+                Text(
+                    text = artwork.title,
+                    style = MaterialTheme.typography.bodyLarge, // Usando la fuente definida en el tema
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .padding(8.dp), // Padding alrededor del título
+                    color = Color.White // Color del texto
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun AddFloatingButton() {
