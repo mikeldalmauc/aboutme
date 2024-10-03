@@ -40,9 +40,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.MainActivity
+import com.example.myapplication.ui.MainActivity
 import com.example.myapplication.R
 import com.example.myapplication.ui.theme.AppTheme
 import kotlinx.coroutines.launch

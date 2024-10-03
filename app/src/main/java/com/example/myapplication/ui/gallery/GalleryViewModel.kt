@@ -1,8 +1,10 @@
+package com.example.myapplication.ui.gallery
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.myapplication.Artwork
-import com.example.myapplication.ArtworkStyle
 import com.example.myapplication.R
+import com.example.myapplication.ui.Artwork
+import com.example.myapplication.ui.ArtworkStyle
 
 class GalleryViewModel : ViewModel() {
     var isSingleColumn = mutableStateOf(false)

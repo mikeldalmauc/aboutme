@@ -1,11 +1,8 @@
-package com.example.myapplication
+package com.example.myapplication.ui.gallery
 
-import GalleryViewModel
-import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,11 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,8 +37,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
+import com.example.myapplication.ui.Artwork
+import com.example.myapplication.ui.ArtworkStyle
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +72,7 @@ fun GalleryTopBar(isSingleColumn: MutableState<Boolean>) {
 }
 
 @Composable
-fun GalleryScreen(innerPadding: PaddingValues,  galleryViewModel: GalleryViewModel, navController: NavController) {
+fun GalleryScreen(innerPadding: PaddingValues, galleryViewModel: GalleryViewModel, navController: NavController) {
     val list = galleryViewModel.artworks.value
     Box(
         modifier = Modifier
