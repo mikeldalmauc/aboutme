@@ -1,8 +1,8 @@
 package com.example.myapplication.ui.home
 
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,30 +17,42 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 import androidx.navigation.NavController
+import com.example.myapplication.ui.theme.AppTheme
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 
 @Composable
@@ -76,7 +88,8 @@ fun Contador(viewModel: HomeViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(32.dp)
+            .border(2.dp, MaterialTheme.colorScheme.outline, RectangleShape),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -105,10 +118,9 @@ fun Contador(viewModel: HomeViewModel) {
     }
 }
 
-
 @Composable
-fun HueSaturationValueScreen(viewModel: HomeViewModel){
-    val hue: Float by viewModel.hue.observeAsState(initial = 0f)
+fun HueSaturationValueScreen(viewModel: HomeViewModel) {
+    val hue: Float by viewModel.hue.observeAsState(initial = 100.0f)
     val saturation: Float by viewModel.saturation.observeAsState(initial = 1.0f)
     val value: Float by viewModel.value.observeAsState(initial = 0.5f)
     val alpha: Float by viewModel.alpha.observeAsState(initial = 1f)
@@ -116,115 +128,225 @@ fun HueSaturationValueScreen(viewModel: HomeViewModel){
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .border(2.dp, MaterialTheme.colorScheme.outline, RectangleShape)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        InfoSection(hue, saturation, value, alpha)
+        SliderSection("Hue", hue, false) { viewModel.onHueChanged(it) }
+        SliderSection("Saturation", saturation, true) { viewModel.onSaturationChanged(it) }
+        SliderSection("Value", value, true) { viewModel.onValueChanged(it) }
+    }
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+@Composable
+fun InfoSection(hue: Float, saturation: Float, value: Float, alpha: Float) {
+
+    val color = Color.hsv(hue, saturation, value, alpha)
+    val argb = color.toArgb()
+    val hex = argb.toHexString(format = HexFormat.UpperCase)
+
+    fun roundOffDecimal(number: Float): String {
+        val df = DecimalFormat("#.###")
+        df.roundingMode = RoundingMode.CEILING
+        return df.format(number)
+    }
+
+    Row(
+
+    ) {
         Box(
             modifier = Modifier
-                .background(Color.hsv(hue, saturation, value, alpha))
-                .fillMaxWidth()
-                .height(200.dp)
+                .background(color)
+                .size(100.dp)
                 .padding(16.dp)
+                .clip(CircleShape),
         ) {
         }
-        Section("Hue", hue) { viewModel.onHueChanged(it) }
+        Text(
+            text = "Hue: ${roundOffDecimal(hue)}\nSaturation: ${roundOffDecimal(saturation)}\nValue: ${roundOffDecimal(value)}\n" +
+                    "Alpha: $alpha",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(16.dp)
+        )
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+
+            Text(
+                text = "R: ${argb.red}\nG: ${argb.green}\nB: ${argb.blue}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Row()
+            {
+
+                Text(
+                    text = "#${hex}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.background(color),
+                    color = Color(255 - argb.red, 255 - argb.green, 255 - argb.blue)
+                )
+            }
+        }
     }
 }
 
 @Composable
-@Preview
-fun SectionPreview() {
-    Section(name = "Hue", value = 0f, onValueChange = {})
-}
+fun SliderSection(name: String, value: Float, hasDecimal: Boolean, onValueChange: (Float) -> Unit) {
+    val valueClamped = if (hasDecimal) value else value.toInt()
 
-@Composable
-fun Section(name: String, value: Float, onValueChange: (Float) -> Unit){
-    Column (
+    Column(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     )
     {
-        Row (horizontalArrangement = Arrangement.SpaceEvenly){
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier.fillMaxWidth()
+
+        ) {
             Text(text = "$name:")
             OutlinedTextField(
-                value = value.toString()
-                , onValueChange = { onValueChange(it.toFloatOrNull() ?: 0f) }
-                , keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                , singleLine = true
-                , maxLines = 1
-                , modifier = Modifier.width(80.dp).height(40.dp).padding(5.dp)
-                , colors =  TextFieldDefaults.colors(
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.surfaceDim,
-                    errorIndicatorColor = MaterialTheme.colorScheme.onError
+                value = valueClamped.toString(),
+                onValueChange = { valueString ->
+                    valueString.toFloatOrNull()?.let { value -> onValueChange(value.toFloat()) }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                maxLines = 1,
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(45.dp)
+                    .padding(0.dp),
+                readOnly = false,
+                textStyle = TextStyle(
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 12.sp,
+                    lineHeight = 12.sp
+                ),
+                enabled = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant, // Color del texto deshabilitado
+                    cursorColor = MaterialTheme.colorScheme.primary, // Color del cursor
+                    focusedBorderColor = MaterialTheme.colorScheme.primary, // Color del borde cuando está enfocado
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant, // Color del borde cuando no está enfocado
+                    errorBorderColor = MaterialTheme.colorScheme.error, // Color del borde cuando hay un error
+                    focusedLabelColor = MaterialTheme.colorScheme.primary, // Color del label cuando está enfocado
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant // Color del label cuando no está enfocado
+                    // Puedes agregar otros colores si es necesario
                 )
+                // Ajuste de padding interno del `OutlinedTextField`
+
             )
+
         }
-        HueSlider(hue = value, onHueChange = { onValueChange(it) })
+        CustomSlider(name, value, onChange = onValueChange)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HueSlider(hue: Float, onHueChange: (Float) -> Unit){
+fun CustomSlider(name: String, value: Float, onChange: (Float) -> Unit) {
 
-        // Slider sin colores para que la pista personalizada sea visible
-        Slider(
-            value = hue,
-            onValueChange = { onHueChange(it) },
-            valueRange = 0f..360f,
-            steps = 359, // Para representar correctamente los 360 tonos
-            modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 0.dp),
-            colors = SliderDefaults.colors(
-                thumbColor = Color.White, // Color del "thumb" del slider
-                activeTrackColor = Color.Transparent, // Hacer transparente el track activo
-                inactiveTrackColor = Color.Transparent, // Hacer transparente el track inactivo
-            ),
-            track = { sliderState ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(12.dp) // Ajustar el tamaño
-                        .drawWithCache {
-                            // Crear un degradado multicolor horizontal
-                            val gradient = Brush.horizontalGradient(
-                                colors = List(361) { Color.hsv(it.toFloat(), 1f, 1f) }
-                            )
-                            onDrawBehind {
-                                // Dibujar la pista del slider como una barra multicolor
-                                drawRoundRect(
-                                    brush = gradient,
-                                    size = Size(size.width, 12.dp.toPx()), // Ajustar el grosor de la pista
-                                )
-                            }
-                        }
-                ){}
-            }
-            , // No mostrar el track por completo
-            thumb = {
-                // Dibujar el thumb personalizado como un triángulo invertido
-                CustomThumb()
-            }
-        )
+    val pair = when (name) {
+        "Hue" -> Pair(0f..360f, 359)
+        "Saturation" -> Pair(0f..1f, 359)
+        "Value" -> Pair(0f..1f, 359)
+        else -> Pair(0f..1f, 359)
     }
+
+    // Slider sin colores para que la pista personalizada sea visible
+    Slider(
+        value = value,
+        onValueChange = { onChange(it) },
+        valueRange = pair.first,
+        steps = pair.second, // Para representar correctamente los 360 tonos
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 0.dp),
+        colors = SliderDefaults.colors(
+            thumbColor = Color.White, // Color del "thumb" del slider
+            activeTrackColor = Color.Transparent, // Hacer transparente el track activo
+            inactiveTrackColor = Color.Transparent, // Hacer transparente el track inactivo
+        ),
+        track = { DrawTrack(name, value) }, // No mostrar el track por completo
+        thumb = { CustomThumb() } // Personalizar el "thumb" del slider
+    )
+}
 
 
 @Composable
-fun CustomThumb(){
-    Canvas(modifier = Modifier.size(18.dp)
-        .offset(x = 0.dp, y = 10.dp)) {
+fun DrawTrack(type: String, value: Float) {
+
+    val brush = when (type) {
+        "Hue" -> hueGradient()
+        "Saturation" -> saturationGradient()
+        "Value" -> valueGradient()
+        else -> valueGradient()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(12.dp) // Ajustar el tamaño
+            .drawWithCache {
+                // Crear un degradado multicolor horizontal
+                onDrawBehind {
+                    // Dibujar la pista del slider como una barra multicolor
+                    drawRoundRect(
+                        brush = brush,
+                        size = Size(size.width, 12.dp.toPx()), // Ajustar el grosor de la pista
+                    )
+                }
+            }
+    ) {}
+}
+
+fun saturationGradient(): Brush {
+    return Brush.horizontalGradient(
+        colors = listOf(
+            Color.hsv(0f, 0f, 1f),
+            Color.hsv(240f, 1f, 1f)
+        )
+    )
+}
+
+fun hueGradient(): Brush {
+    return Brush.horizontalGradient(
+        colors = List(361) { Color.hsv(it.toFloat(), 1f, 1f) }
+    )
+}
+
+fun valueGradient(): Brush {
+    return Brush.horizontalGradient(
+        colors = listOf(
+            Color.hsv(0f, 0.0f, 0.0f),
+            Color.hsv(0f, 0.0f, 1.0f)
+        )
+    )
+}
+
+@Composable
+fun CustomThumb() {
+    val thumbColor = MaterialTheme.colorScheme.onBackground
+    Canvas(
+        modifier = Modifier
+            .size(18.dp)
+            .offset(x = 0.dp, y = 10.dp)
+    ) {
         val trianglePath = Path().apply {
             moveTo(size.width / 2f, 0f) // Punto inferior medio (punta)
             lineTo(0f, size.height) // Lado izquierdo
             lineTo(size.width, size.height) // Lado derecho
             close()
         }
-        drawPath(trianglePath, color = Color.White) // Color del triángulo
+        drawPath(trianglePath, color = thumbColor, style = Stroke(width = 3.dp.toPx()))
     }
 }
+

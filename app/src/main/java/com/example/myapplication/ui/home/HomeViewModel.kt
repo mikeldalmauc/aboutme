@@ -50,10 +50,21 @@ class HomeViewModel : ViewModel() {
 
 
     fun onHueChanged(it: Float) {
-        // Limitar el valor entre 0 y 360
-        val clampedValue = it.coerceIn(0f, 360f)
-
+        // Asegurarse de que el valor sea un número válido
+        val clampedValue = it.coerceIn(0.0f, 360.0f)
         _hue.value = clampedValue
+
     }
 
+    fun onSaturationChanged(it: Float) {
+        // Asegurarse de que el valor sea un número válido
+        val clampedValue = it.coerceIn(0.0f, 1.0f)
+        _saturation.value = clampedValue
+    }
+
+    fun onValueChanged(it: Float) {
+        // Asegurarse de que el valor sea un número válido
+        val clampedValue = it.coerceIn(0.0f, 1.0f)
+        _value.value = clampedValue
+    }
 }
