@@ -27,6 +27,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
@@ -245,13 +246,18 @@ fun InfoSection(
             )
             , shape = MaterialTheme.shapes.small
             , contentPadding = PaddingValues(2.dp)
-
+            , colors = ButtonDefaults.textButtonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+          //  , modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             Text(
                 text = when (colorSpace) {
                     HomeViewModel.ColorSpace.HSV -> "HSV"
                     HomeViewModel.ColorSpace.RGB -> "RGB"
                 }
+                , color = MaterialTheme.colorScheme.onSecondaryContainer
                 , style = MaterialTheme.typography.bodyLarge
                 , modifier = Modifier.padding(4.dp)
             )
@@ -261,10 +267,19 @@ fun InfoSection(
         DropdownMenu(
             offset = DpOffset(260.dp, 0.dp), // Ajustar
             expanded = expanded, // Usar el estado para controlar la expansión
-            onDismissRequest = { expanded = false } // Cerrar el menú al hacer clic fuera de él
+            onDismissRequest = { expanded = false }, // Cerrar el menú al hacer clic fuera de él
+            modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             DropdownMenuItem(
                 text = { Text("HSV") },
+                colors = MenuItemColors(
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    leadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    trailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    disabledTextColor = MaterialTheme.colorScheme.surfaceDim,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
                 onClick = {
                     changeColorSpace(HomeViewModel.ColorSpace.HSV)
                     expanded = false // Cerrar el menú después de seleccionar
@@ -272,6 +287,14 @@ fun InfoSection(
             )
             DropdownMenuItem(
                 text = { Text("RGB") },
+                colors = MenuItemColors(
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    leadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    trailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    disabledTextColor = MaterialTheme.colorScheme.surfaceDim,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
                 onClick = {
                     changeColorSpace(HomeViewModel.ColorSpace.RGB)
                     expanded = false // Cerrar el menú después de seleccionar
