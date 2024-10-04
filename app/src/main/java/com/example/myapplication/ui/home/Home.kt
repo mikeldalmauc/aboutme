@@ -61,9 +61,11 @@ import androidx.core.graphics.red
 import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.ui.theme.AppTheme
+import java.lang.Float.max
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.math.abs
+import kotlin.math.min
 
 
 @Composable
@@ -162,27 +164,13 @@ fun HueSaturationValueScreen(viewModel: HomeViewModel) {
 @OptIn(ExperimentalStdlibApi::class)
 @Composable
 fun InfoSection(hue: Float, saturation: Float, value: Float, alpha: Float) {
+
     val clipboardManager: androidx.compose.ui.platform.ClipboardManager = LocalClipboardManager.current
 
     val color = Color.hsv(hue, saturation, value, alpha)
     val argb = color.toArgb()
-
-    var inverseColor = Color(255 - argb.red, 255 - argb.green, 255 - argb.blue)
-    val argbInverse = inverseColor.toArgb()
-
+    val inverseColor = ajustarContraste(color)
     val hex = argb.toHexString(format = HexFormat.UpperCase)
-
-    val lumColor = 0.2126*argb.red + 0.7152*argb.green + 0.0722*argb.blue
-    val lumInverse = 0.2126*argbInverse.red + 0.7152*argbInverse.green + 0.0722*argbInverse.blue
-
-    if ( abs(lumColor - lumInverse) < 40 && lumColor - lumInverse < 0) {
-        inverseColor = Color(255 - argb.red - 50, 255 - argb.green - 50, 255 - argb.blue - 50)
-    } else if (abs(lumColor - lumInverse) < 40 && lumColor - lumInverse > 0) {
-        inverseColor = Color(255 - argb.red + 50, 255 - argb.green+50, 255 - argb.blue + 50)
-    }
-
-
-    Color(255 - argb.red, 255 - argb.green, 255 - argb.blue)
 
     fun roundOffDecimal(number: Float): String {
         val df = DecimalFormat("#.###")
@@ -417,3 +405,26 @@ fun CustomThumb() {
     }
 }
 
+fun ajustarContraste(fondo: Color): Color {
+    // Calcular la luminosidad del color de fondo
+    val r = fondo.red
+    val g = fondo.green
+    val b = fondo.blue
+    val luminosidad = (0.299 * r + 0.587 * g + 0.114 * b)
+
+    // Ajustar el contraste utilizando un coeficiente exponencial
+    // para aumentar el contraste de manera más notoria cuando la luminosidad es baja
+    val factorContraste = if (luminosidad < 0.5) {
+        1 + (0.5 - luminosidad) * 2 // Ajuste para mayor contraste con fondo oscuro
+    } else {
+        1 - (luminosidad - 0.5) * 2 // Ajuste para mayor contraste con fondo claro
+    }
+
+    // Calcular el color contrario con mayor contraste
+    val colorContrario = if (luminosidad < 0.5) Color.White else Color.Black
+    val rContraste = min(1f, max(0f, (colorContrario.red * factorContraste).toFloat()))
+    val gContraste = min(1f, max(0f, (colorContrario.green * factorContraste).toFloat()))
+    val bContraste = min(1f, max(0f, (colorContrario.blue * factorContraste).toFloat()))
+
+    return Color(rContraste, gContraste, bContraste)
+}
