@@ -22,6 +22,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,13 +32,18 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -53,6 +61,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.blue
@@ -71,7 +80,7 @@ import kotlin.math.min
 @Composable
 fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
     // LazyColumn con fondo semi-transparente
-    var homeViewModel = HomeViewModel()
+    val homeViewModel = HomeViewModel()
 
     Box(
         modifier = Modifier
@@ -145,6 +154,13 @@ fun HueSaturationValueScreen(viewModel: HomeViewModel) {
     val saturation: Float by viewModel.saturation.observeAsState(initial = 1.0f)
     val value: Float by viewModel.value.observeAsState(initial = 0.5f)
     val alpha: Float by viewModel.alpha.observeAsState(initial = 1f)
+    val color: Color by viewModel.color.observeAsState(initial = Color.Red)
+    val argb: Int by viewModel.argbColor.observeAsState(initial = Color.Red.toArgb())
+    val hex: String by viewModel.hex.observeAsState(initial = "#FF0000")
+    val red: Float by viewModel.red.observeAsState(initial = 255f)
+    val green: Float by viewModel.green.observeAsState(initial = 0f)
+    val blue: Float by viewModel.blue.observeAsState(initial = 0f)
+    val spaceColor: HomeViewModel.ColorSpace by viewModel.colorSpace.observeAsState(initial = HomeViewModel.ColorSpace.HSV)
 
     Column(
         modifier = Modifier
@@ -154,23 +170,59 @@ fun HueSaturationValueScreen(viewModel: HomeViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        InfoSection(hue, saturation, value, alpha)
-        SliderSection("Hue", hue, hue, false) { viewModel.onHueChanged(it) }
-        SliderSection("Saturation", saturation, hue, true) { viewModel.onSaturationChanged(it) }
-        SliderSection("Value", value, hue, true) { viewModel.onValueChanged(it) }
+        InfoSection(
+            hue,
+            saturation,
+            value,
+            alpha,
+            color,
+            argb,
+            hex,
+            spaceColor
+        ) { viewModel.changeColorSpace(it) }
+
+        when (spaceColor) {
+            HomeViewModel.ColorSpace.HSV -> {
+                SliderSection("Hue", hue, hue, false) { viewModel.onHueChanged(it) }
+                SliderSection("Saturation", saturation, hue, true) {
+                    viewModel.onSaturationChanged(
+                        it
+                    )
+                }
+                SliderSection("Value", value, hue, true) { viewModel.onValueChanged(it) }
+            }
+
+            HomeViewModel.ColorSpace.RGB -> {
+                SliderSection("Red", red, hue, false) { viewModel.onRedChanged(it) }
+                SliderSection("Green", green, hue, false) { viewModel.onGreenChanged(it) }
+                SliderSection("Blue", blue, hue, false) { viewModel.onBlueChanged(it) }
+            }
+
+            else -> {
+                // No hacer nada
+            }
+        }
+
     }
 }
 
-@OptIn(ExperimentalStdlibApi::class)
 @Composable
-fun InfoSection(hue: Float, saturation: Float, value: Float, alpha: Float) {
+fun InfoSection(
+    hue: Float,
+    saturation: Float,
+    value: Float,
+    alpha: Float,
+    color: Color,
+    argb: Int,
+    hex: String,
+    colorSpace: HomeViewModel.ColorSpace,
+    changeColorSpace: (HomeViewModel.ColorSpace) -> Unit
+) {
 
-    val clipboardManager: androidx.compose.ui.platform.ClipboardManager = LocalClipboardManager.current
-
-    val color = Color.hsv(hue, saturation, value, alpha)
-    val argb = color.toArgb()
+    val clipboardManager: androidx.compose.ui.platform.ClipboardManager =
+        LocalClipboardManager.current
+    var expanded by remember { mutableStateOf(false) }
     val inverseColor = ajustarContraste(color)
-    val hex = argb.toHexString(format = HexFormat.UpperCase)
 
     fun roundOffDecimal(number: Float): String {
         val df = DecimalFormat("#.###")
@@ -178,9 +230,59 @@ fun InfoSection(hue: Float, saturation: Float, value: Float, alpha: Float) {
         return df.format(number)
     }
 
-    Box (
+    // Botón para expandir el menú
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopEnd
+    )
+    {
+        // Botón estilo "TextButton" para integrarlo visualmente
+        TextButton(
+            onClick = { expanded = !expanded } // Cambiar el estado de expansión
+            , elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = -2.dp
+            )
+            , shape = MaterialTheme.shapes.small
+            , contentPadding = PaddingValues(2.dp)
+
+        ) {
+            Text(
+                text = when (colorSpace) {
+                    HomeViewModel.ColorSpace.HSV -> "HSV"
+                    HomeViewModel.ColorSpace.RGB -> "RGB"
+                }
+                , style = MaterialTheme.typography.bodyLarge
+                , modifier = Modifier.padding(4.dp)
+            )
+        }
+
+        // DropdownMenu para seleccionar el espacio de color
+        DropdownMenu(
+            offset = DpOffset(260.dp, 0.dp), // Ajustar
+            expanded = expanded, // Usar el estado para controlar la expansión
+            onDismissRequest = { expanded = false } // Cerrar el menú al hacer clic fuera de él
+        ) {
+            DropdownMenuItem(
+                text = { Text("HSV") },
+                onClick = {
+                    changeColorSpace(HomeViewModel.ColorSpace.HSV)
+                    expanded = false // Cerrar el menú después de seleccionar
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("RGB") },
+                onClick = {
+                    changeColorSpace(HomeViewModel.ColorSpace.RGB)
+                    expanded = false // Cerrar el menú después de seleccionar
+                }
+            )
+        }
+    }
+
+    Box(
         contentAlignment = Alignment.BottomEnd,
-    ){
+    ) {
 
         Row(
             modifier = Modifier
@@ -228,6 +330,7 @@ fun InfoSection(hue: Float, saturation: Float, value: Float, alpha: Float) {
             }
         }
 
+        // Botón para copiar el valor hexadecimal al portapapeles
         Image(
             painter = painterResource(id = R.drawable.baseline_content_copy_24),
             contentDescription = "Copy",
@@ -240,13 +343,17 @@ fun InfoSection(hue: Float, saturation: Float, value: Float, alpha: Float) {
             colorFilter = ColorFilter.lighting(MaterialTheme.colorScheme.onBackground, Color.Black)
         )
     }
-
-
 }
 
 
 @Composable
-fun SliderSection(name: String, value: Float, hue: Float, hasDecimal: Boolean, onValueChange: (Float) -> Unit) {
+fun SliderSection(
+    name: String,
+    value: Float,
+    hue: Float,
+    hasDecimal: Boolean,
+    onValueChange: (Float) -> Unit
+) {
     val valueClamped = if (hasDecimal) value else value.toInt()
 
     Column(
@@ -266,7 +373,7 @@ fun SliderSection(name: String, value: Float, hue: Float, hasDecimal: Boolean, o
             OutlinedTextField(
                 value = valueClamped.toString(),
                 onValueChange = { valueString ->
-                    valueString.toFloatOrNull()?.let { value -> onValueChange(value.toFloat()) }
+                    valueString.toFloatOrNull()?.let { value -> onValueChange(value) }
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
@@ -297,27 +404,30 @@ fun SliderSection(name: String, value: Float, hue: Float, hasDecimal: Boolean, o
             )
 
         }
-        CustomSlider(name, value, hue, onChange = onValueChange)
+        CustomSlider(
+            sliderRangeAndStep(name),
+            sliderGradientBrush(name, hue),
+            value,
+            onChange = onValueChange
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomSlider(name: String, value: Float, hue: Float, onChange: (Float) -> Unit) {
-
-    val pair = when (name) {
-        "Hue" -> Pair(0f..360f, 359)
-        "Saturation" -> Pair(0f..1f, 359)
-        "Value" -> Pair(0f..1f, 359)
-        else -> Pair(0f..1f, 359)
-    }
+fun CustomSlider(
+    rangeAndStep: Pair<ClosedFloatingPointRange<Float>, Int>,
+    brush: Brush,
+    value: Float,
+    onChange: (Float) -> Unit
+) {
 
     // Slider sin colores para que la pista personalizada sea visible
     Slider(
         value = value,
         onValueChange = { onChange(it) },
-        valueRange = pair.first,
-        steps = pair.second, // Para representar correctamente los 360 tonos
+        valueRange = rangeAndStep.first,
+        steps = rangeAndStep.second, // Para representar correctamente los 360 tonos
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 0.dp),
@@ -326,21 +436,14 @@ fun CustomSlider(name: String, value: Float, hue: Float, onChange: (Float) -> Un
             activeTrackColor = Color.Transparent, // Hacer transparente el track activo
             inactiveTrackColor = Color.Transparent, // Hacer transparente el track inactivo
         ),
-        track = { DrawTrack(name, value, hue) }, // No mostrar el track por completo
+        track = { DrawTrack(brush) }, // No mostrar el track por completo
         thumb = { CustomThumb() } // Personalizar el "thumb" del slider
     )
 }
 
 
 @Composable
-fun DrawTrack(type: String, value: Float, hue: Float) {
-
-    val brush = when (type) {
-        "Hue" -> hueGradient()
-        "Saturation" -> saturationGradient(hue)
-        "Value" -> valueGradient()
-        else -> valueGradient()
-    }
+fun DrawTrack(brush: Brush) {
 
     Box(
         modifier = Modifier
@@ -359,11 +462,40 @@ fun DrawTrack(type: String, value: Float, hue: Float) {
     ) {}
 }
 
+fun sliderGradientBrush(name: String, hue: Float): Brush = when (name) {
+    "Hue" -> hueGradient()
+    "Saturation" -> saturationGradient(hue)
+    "Value" -> valueGradient()
+    "Red" -> colorGradient(0.0f)
+    "Green" -> colorGradient(120.0f)
+    "Blue" -> colorGradient(240.0f)
+    else -> valueGradient()
+}
+
+fun sliderRangeAndStep(name: String): Pair<ClosedFloatingPointRange<Float>, Int> = when (name) {
+    "Hue" -> Pair(0f..360f, 359)
+    "Saturation" -> Pair(0f..1f, 359)
+    "Value" -> Pair(0f..1f, 359)
+    "Red" -> Pair(0f..255f, 255)
+    "Green" -> Pair(0f..255f, 255)
+    "Blue" -> Pair(0f..255f, 255)
+    else -> Pair(0f..1f, 359)
+}
+
+fun colorGradient(hue: Float): Brush {
+    return Brush.horizontalGradient(
+        colors = listOf(
+            Color.hsv(hue, 0f, 0.0f),
+            Color.hsv(hue, 1f, 1f)
+        )
+    )
+}
+
 fun saturationGradient(hue: Float): Brush {
     return Brush.horizontalGradient(
         colors = listOf(
             Color.hsv(hue, 0f, 0.5f),
-            Color.hsv(hue, 1f, 0.5f)
+            Color.hsv(hue, 1f, 1f)
         )
     )
 }

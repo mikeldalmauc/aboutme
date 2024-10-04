@@ -39,8 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.R
-import com.example.myapplication.ui.Artwork
-import com.example.myapplication.ui.ArtworkStyle
 
 
 @OptIn(ExperimentalMaterial3Api::class)

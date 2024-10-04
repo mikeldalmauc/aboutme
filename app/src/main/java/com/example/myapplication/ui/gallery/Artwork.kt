@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.gallery
 
 data class Artwork(
     val name: String,
