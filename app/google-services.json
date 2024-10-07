@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "632287857539",
+    "project_id": "damnapp-83706",
+    "storage_bucket": "damnapp-83706.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632287857539:android:f037c50bbd8e8b132404b6",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjbyHvGAuh1ng556Gf8V5x8FMBL7wkAN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.home
+package com.example.myapplication.ui.pages.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,6 +22,8 @@ fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
     // LazyColumn con fondo semi-transparente
     val homeViewModel = HomeViewModel()
     val contadorViewModel = ContadorViewModel()
+    val contadorViewModel2 = ContadorViewModel()
+    val contadorViewModel3 = ContadorViewModel()
     val colorPickerViewModel = ColorPickerViewModel()
 
     Box(
@@ -35,8 +37,7 @@ fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
                 .padding(vertical = 20.dp)
         ) {
             item {
-                Contador(contadorViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 ColorPicker(colorPickerViewModel)
             }
         }

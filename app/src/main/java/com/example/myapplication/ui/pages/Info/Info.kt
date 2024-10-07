@@ -1,4 +1,4 @@
-package com.example.myapplication.ui
+package com.example.myapplication.ui.pages.Info
 
 import android.content.Intent
 import android.graphics.BlurMaskFilter

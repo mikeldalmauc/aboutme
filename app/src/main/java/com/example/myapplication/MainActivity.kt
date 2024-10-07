@@ -1,18 +1,16 @@
-package com.example.myapplication.ui
+package com.example.myapplication
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -29,6 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,40 +39,80 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.R
-import com.example.myapplication.ui.gallery.AddFloatingButton
-import com.example.myapplication.ui.gallery.GalleryScreen
-import com.example.myapplication.ui.gallery.GalleryTopBar
-import com.example.myapplication.ui.gallery.GalleryViewModel
-import com.example.myapplication.ui.home.HomeScreen
+import com.example.myapplication.ui.pages.settings.SettingsScreen
+import com.example.myapplication.ui.pages.settings.SettingsTopBar
+import com.example.myapplication.ui.pages.Info.AboutTopBar
+import com.example.myapplication.ui.pages.Info.InfoScreen
+import com.example.myapplication.ui.pages.Info.ShareFloatingButton
+import com.example.myapplication.ui.pages.gallery.AddFloatingButton
+import com.example.myapplication.ui.pages.gallery.GalleryScreen
+import com.example.myapplication.ui.pages.gallery.GalleryTopBar
+import com.example.myapplication.ui.pages.gallery.GalleryViewModel
+import com.example.myapplication.ui.pages.home.HomeScreen
+import com.example.myapplication.login.LoginActivity
 import com.example.myapplication.ui.theme.AppTheme
+import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : ComponentActivity() {
+
+    // Inicializar la actividad
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        // Llamar a la superclase
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Inicializar el ViewModel
+        val mainViewModel = MainViewModel(this)
+
         setContent {
+
+            // Acceder al contexto actual
+            val context = LocalContext.current
+            // Observar el usuario actual
+            val user: FirebaseUser? by mainViewModel.user.collectAsState(initial = null)
+            // Observar eventos de navegación
+            val navigationTarget: MainViewModel.NavigationTarget by mainViewModel.navigationTarget.observeAsState(
+                MainViewModel.NavigationTarget.Main
+            )
+
+            // Observar los eventos de navegación
+            LaunchedEffect(Unit) {
+                // Observamos los eventos de navegación
+                mainViewModel.navigationChannel.collect {
+                    when(navigationTarget) {
+                        MainViewModel.NavigationTarget.Main -> {
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }
+                        MainViewModel.NavigationTarget.Login -> {
+                            context.startActivity(Intent(context, LoginActivity::class.java))
+                        }
+                        else -> {
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }
+                    }
+
+                    (context as Activity).finish()
+                }
+            }
+
+            // Configurar el contenido de la actividad
             AppTheme {
-                MainContent()
+
+                // Mostrar la pantalla de inicio
+                MainContent(mainViewModel)
             }
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun MainContentPreview() {
-    MainContent()
-}
-
-@Composable
-fun MainContent() {
+fun MainContent(mainViewModel: MainViewModel) {
     val navController = rememberNavController()
     val galleryViewModel: GalleryViewModel = viewModel()
     val current = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -98,7 +140,7 @@ fun MainContent() {
             composable("home") { HomeScreen(innerPadding, navController) }
             composable("info") { InfoScreen(innerPadding, navController) }
             composable("gallery") { GalleryScreen(innerPadding, galleryViewModel, navController) }
-            composable("settings") { SettingsScreen(innerPadding, navController) }
+            composable("settings") { SettingsScreen(innerPadding, navController, mainViewModel) }
         }
     }
 }
@@ -107,8 +149,6 @@ fun MainContent() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar() {
-    val context = LocalContext.current // Access the current context
-
     TopAppBar(
         colors = topAppBarColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -150,6 +190,7 @@ fun BottomNavBar(navController: NavHostController) {
 
     // Componente actual
     val actual = navController.currentBackStackEntry?.destination?.route
+
     val colors = NavigationBarItemDefaults.colors(
         selectedIconColor = MaterialTheme.colorScheme.secondaryContainer, // Color del ícono cuando está seleccionado
         unselectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer, // Color del ícono cuando no está seleccionado

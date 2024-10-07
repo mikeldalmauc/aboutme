@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.gallery
+package com.example.myapplication.ui.pages.gallery
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
