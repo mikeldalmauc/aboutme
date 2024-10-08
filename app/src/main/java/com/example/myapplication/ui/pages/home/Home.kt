@@ -21,13 +21,15 @@ import com.example.myapplication.ui.componentes.ColorPicker
 import com.example.myapplication.ui.componentes.ProgressScreen
 import com.example.myapplication.ui.componentes.ProgressScreen2
 import com.example.myapplication.ui.componentes.ProgressScreen3
+import com.example.myapplication.ui.componentes.TodoApp
+import com.example.myapplication.ui.componentes.TodoViewModel
 
 
 @Composable
 fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
     // LazyColumn con fondo semi-transparente
     val homeViewModel = HomeViewModel()
-    val adressFormaterViewModel = AdressFormatterViewModel()
+    val todoViewModel = TodoViewModel()
 
     Box(
         modifier = Modifier
@@ -41,8 +43,7 @@ fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
         ) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-
-                AddressFormatterScreen(adressFormaterViewModel)
+                TodoApp(todoViewModel)
             }
         }
     }
