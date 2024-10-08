@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.pages.home
 
+import LoaderViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -11,20 +12,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.myapplication.ui.componentes.AddressFormatterScreen
+import com.example.myapplication.ui.componentes.AdressFormatterViewModel
 import com.example.myapplication.ui.componentes.ColorPickerViewModel
 import com.example.myapplication.ui.componentes.Contador
 import com.example.myapplication.ui.componentes.ContadorViewModel
 import com.example.myapplication.ui.componentes.ColorPicker
+import com.example.myapplication.ui.componentes.ProgressScreen
+import com.example.myapplication.ui.componentes.ProgressScreen2
+import com.example.myapplication.ui.componentes.ProgressScreen3
 
 
 @Composable
 fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
     // LazyColumn con fondo semi-transparente
     val homeViewModel = HomeViewModel()
-    val contadorViewModel = ContadorViewModel()
-    val contadorViewModel2 = ContadorViewModel()
-    val contadorViewModel3 = ContadorViewModel()
-    val colorPickerViewModel = ColorPickerViewModel()
+    val adressFormaterViewModel = AdressFormatterViewModel()
 
     Box(
         modifier = Modifier
@@ -38,7 +41,8 @@ fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
         ) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
-                ColorPicker(colorPickerViewModel)
+
+                AddressFormatterScreen(adressFormaterViewModel)
             }
         }
     }

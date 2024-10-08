@@ -70,6 +70,16 @@ class LoginActivity : ComponentActivity() {
                 }
             }
 
+            val errorMsgString: String by viewModel.errorMsg.observeAsState(initial = "")
+
+            // Observar los eventos de  error
+            LaunchedEffect(Unit) {
+                viewModel.errorChannel.collect {
+                    // Error message
+                    Toast.makeText(context, errorMsgString, Toast.LENGTH_SHORT).show()
+                }
+            }
+
             AppTheme {
                 when(viewModel.isRegister.observeAsState(initial = "").value) {
                     true -> RegisterView(viewModel)
@@ -87,7 +97,6 @@ fun LoginView(viewModel: LoginViewModel) {
     val context = LocalContext.current
 
     // Codigo de error y su string correspondiente
-    val errorMsgString = stringResource(R.string.login_error)
 
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
@@ -110,7 +119,7 @@ fun LoginView(viewModel: LoginViewModel) {
 
             // Login button
             Spacer(modifier = Modifier.height(25.dp))
-            ActionButton(loginEnable) {
+            ActionButton("Login", loginEnable) {
                 viewModel.onLoginSelected()
             }
             Spacer(modifier = Modifier.height(25.dp))
@@ -121,13 +130,6 @@ fun LoginView(viewModel: LoginViewModel) {
         }
     }
 
-    // Observar los eventos de  error
-    LaunchedEffect(Unit) {
-        viewModel.errorChannel.collect {
-            // Error message
-            Toast.makeText(context, errorMsgString, Toast.LENGTH_SHORT).show()
-        }
-    }
 }
 
 
@@ -160,25 +162,17 @@ fun RegisterView(viewModel: LoginViewModel) {
             TextField(name) { viewModel.oRegisterChanged(it, email, password, password2) }
             EmailField(email) { viewModel.oRegisterChanged(name, it, password, password2) }
             PasswordField(password, "Password") { viewModel.oRegisterChanged(name, email, it, password2) }
-            PasswordField(password, "Repeat Password") { viewModel.oRegisterChanged(name, email, password, it) }
+            PasswordField(password2, "Repeat Password") { viewModel.oRegisterChanged(name, email, password, it) }
 
             // Login button
             Spacer(modifier = Modifier.height(25.dp))
-            ActionButton(registreEnable) {
+            ActionButton("Register", registreEnable) {
                 viewModel.onRegisterSelected()
             }
             Spacer(modifier = Modifier.height(25.dp))
             TextButton(onClick = { viewModel.toggleView()}) {
                 Text("back to Login")
             }
-        }
-    }
-
-    // Observar los eventos de  error
-    LaunchedEffect(Unit) {
-        viewModel.errorChannel.collect {
-            // Error message
-            Toast.makeText(context, errorMsgString, Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -241,7 +235,7 @@ fun PasswordField(password: String, label: String,  onTextFieldChanged: (String)
 }
 
 @Composable
-fun ActionButton(loginEnable: Boolean, onLoginSelected: () -> Unit) {
+fun ActionButton(text: String, loginEnable: Boolean, onLoginSelected: () -> Unit) {
     Button(
         onClick = { onLoginSelected() },
         enabled = loginEnable,
@@ -263,7 +257,7 @@ fun ActionButton(loginEnable: Boolean, onLoginSelected: () -> Unit) {
         )
     ) {
         Text(
-            "Login", // Cambia el texto si es necesario,
+            text, // Cambia el texto si es necesario,
             fontWeight = FontWeight.SemiBold,
             style = MaterialTheme.typography.headlineLarge, // Usar estilo de texto del tema
             color = MaterialTheme.colorScheme.onSecondary // Usar color de texto del tema

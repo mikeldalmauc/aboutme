@@ -87,7 +87,7 @@ class ColorPickerViewModel : ViewModel() {
 
         // Asegurarse de que _color.value no sea null antes de llamar a toArgb
         _color.value?.let { color ->
-                _argbColor.value = color.toArgb()
+            _argbColor.value = color.toArgb()
 
             // Asegurarse de que _argbColor.value no sea null antes de llamar a toHexString
             _argbColor.value?.let { argb ->

@@ -29,6 +29,11 @@ class LoginViewModel(mainActivity: ComponentActivity) : ViewModel() {
     val errorChannel = _errorChanner.receiveAsFlow()
 
     // Login component field states
+    private val _errorMsg = MutableLiveData<String>()
+    val errorMsg: LiveData<String> = _errorMsg
+
+
+    // Login component field states
     private val _name = MutableLiveData<String>()
     val name: LiveData<String> = _name
 
@@ -100,6 +105,7 @@ class LoginViewModel(mainActivity: ComponentActivity) : ViewModel() {
                         _navigationChannel.send(Unit)
                     }
                 } else {
+                    _errorMsg.value = task.result?.toString() ?: "Error en el login"
                     viewModelScope.launch {
                         _errorChanner.send(Unit)
                     }
@@ -111,7 +117,12 @@ class LoginViewModel(mainActivity: ComponentActivity) : ViewModel() {
         auth.createUserWithEmailAndPassword(_email.value!!, _password.value!!)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    viewModelScope.launch {
+                        _navigationChannel.send(Unit)
+                    }
                 } else {
+                    _errorMsg.value = task.result?.toString() ?: "Error en el registro"
+
                     viewModelScope.launch {
                         _errorChanner.send(Unit)
                     }
