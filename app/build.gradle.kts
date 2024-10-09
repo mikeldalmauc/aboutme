@@ -87,4 +87,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))  // Firebase BOM
     implementation("com.google.firebase:firebase-auth")                  // Firebase Authentication
     implementation("com.google.firebase:firebase-firestore")             // Cloud Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+
 }
