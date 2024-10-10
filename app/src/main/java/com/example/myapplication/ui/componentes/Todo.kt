@@ -229,7 +229,7 @@ fun SortableTodoItemView(
                         .align(Alignment.Center)
                 )
             }
-            Box(
+       /*     Box(
                 modifier = Modifier
                     .size(27.dp) // or your desired button size
                     .clickable(onClick = onFloatClick)
@@ -243,7 +243,7 @@ fun SortableTodoItemView(
                         .alpha(0.6f)
                         .align(Alignment.Center)
                 )
-            }
+            }*/
             Box(
                 modifier = Modifier
                     .size(22.dp) // or your desired button size

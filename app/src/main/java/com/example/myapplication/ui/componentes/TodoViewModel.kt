@@ -73,7 +73,7 @@ class TodoViewModel : ViewModel() {
     fun addTodo(title: String) {
         Log.i("TodoViewModel", "Adding todo...")
 
-        val maxSortId = _todoDone.value
+        val maxSortId = _todosNotDone.value
             .filter { it.completed.not() }
             .fold(0) { acc, todo -> maxOf(acc, todo.sortId) }
 
@@ -95,7 +95,7 @@ class TodoViewModel : ViewModel() {
             true -> db.document(todo.id).update("completed", true,"fechaCompletado", Timestamp.now(), "sortId",
                 _todoDone.value.minOf { it.sortId } - 9999)
             false -> db.document(todo.id).update("completed", false, "fechaCompletado", null, "sortId",
-                _todoDone.value.minOf { it.sortId } - 1)
+                _todosNotDone.value.minOf { it.sortId } - 1)
         }
     }
 
