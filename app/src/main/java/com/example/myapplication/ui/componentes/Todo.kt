@@ -110,7 +110,7 @@ fun TodoApp(viewModel: TodoViewModel) {
         )
         {
             items(
-                items = todosNotDone.sortedBy { it.sortId },
+                items = todosNotDone,
                 key = { it.id }
             ) { todo ->
                 SortableTodoItemView(
@@ -146,7 +146,7 @@ fun TodoApp(viewModel: TodoViewModel) {
 
                 // DONES LIST
                 items(
-                    items = todoDone.sortedByDescending { it.fechaCompletado }, key = { it.id }
+                    items = todoDone, key = { it.id }
                 ) { todo ->
                     TodoItemView(
                         todo = todo,
@@ -217,7 +217,7 @@ fun SortableTodoItemView(
             Box(
                 modifier = Modifier
                     .size(22.dp) // or your desired button size
-                    .clickable(onClick = onSinkClick)
+                    .clickable(onClick = onFloatClick)
                     .align(Alignment.CenterHorizontally)
             ) {
                 Icon(
@@ -247,7 +247,7 @@ fun SortableTodoItemView(
             Box(
                 modifier = Modifier
                     .size(22.dp) // or your desired button size
-                    .clickable(onClick = onFloatClick)
+                    .clickable(onClick = onSinkClick)
                     .align(Alignment.CenterHorizontally)
             ) {
                 Icon(
