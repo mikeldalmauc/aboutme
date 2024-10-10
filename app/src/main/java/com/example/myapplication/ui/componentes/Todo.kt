@@ -4,11 +4,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
@@ -29,18 +28,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.R
 
 @Composable
 fun TodoApp(viewModel: TodoViewModel) {
 
-    val todoList: List<TodoItem> by viewModel.todoList.collectAsState()
+    val todos: List<TodoItem> by viewModel.todoList.collectAsState()
     var newTodoTitle by remember { mutableStateOf(TextFieldValue("")) }
+
+    val todosNotDone = todos.filterNot { it.completed }
+    val todoDone = todos.filter { it.completed }
+    var todoDoneExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .padding(16.dp)
+        , horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header para la lista de tareas
 
@@ -86,43 +95,108 @@ fun TodoApp(viewModel: TodoViewModel) {
 
 
         // Lista de tareas
-     /*
-        items(
-            items = todos.sortedBy { it.isCompleted }.sortedByDescending { it.fechaCompletado },
-            key = { it.id }
-        ) { todo ->
-            TodoItemView(
-                todo = todo,
-                onCheckedChange = {
-                    viewModel.updateTodoStatus(todo, it)
-                },
-                onDeleteClick = {
-                    viewModel.deleteTodo(todo)
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally
+        )
+        {
+            items(
+                items = todosNotDone.sortedBy { it.sortId },
+                key = { it.id }
+            ) { todo ->
+                TodoItemView(
+                    todo = todo,
+                    alfa = 1.0f,
+                    onCheckedChange = {
+                        viewModel.updateTodoStatus(todo, it)
+                    },
+                    onDeleteClick = {
+                        viewModel.deleteTodo(todo)
+                    }
+                )
+            }
+
+            item {
+                HorizontalDivider()
+            }
+            if(todoDoneExpanded){
+                // EXPAND BUTTON
+                item {
+                    ToggleExpandButton(
+                        { todoDoneExpanded = todoDoneExpanded.not() },
+                        R.drawable.baseline_keyboard_arrow_down_24
+                    )
                 }
-            )
+
+                // DONES LIST
+                items(
+                    items = todoDone.sortedByDescending { it.fechaCompletado }
+                    , key = { it.id }
+                ) { todo ->
+                    TodoItemView(
+                        todo = todo,
+                        alfa = 0.6f,
+                        onCheckedChange = {
+                            viewModel.updateTodoStatus(todo, it)
+                        },
+                        onDeleteClick = {
+                            viewModel.deleteTodo(todo)
+                        },
+                    )
+                }
+            }else{
+                // COLLAPSE BUTTON
+                item {
+                    ToggleExpandButton(
+                        { todoDoneExpanded = todoDoneExpanded.not() },
+                        R.drawable.baseline_keyboard_arrow_up_24
+                    )
+                }
+            }
+
         }
-        */
+
     }
 }
 
 
 @Composable
-fun TodoItemView(todo: TodoItem, onCheckedChange: (Boolean) -> Unit, onDeleteClick: () -> Unit) {
+fun ToggleExpandButton(todoDoneExpanded: () -> Unit, id : Int){
+    IconButton(
+        onClick = todoDoneExpanded
+        , modifier = Modifier
+            .padding(2.dp) // Padding del botón
+    ) {
+        Icon(
+            painter = painterResource(id = id ),
+            contentDescription = "Icono para explandir la lista de elementos completados",
+            modifier = Modifier
+                .size(24.dp)
+                .alpha(0.6f)
+            , // Tamaño del icono
+            // Centrar el icono dentro del recuadro
+        )
+    }
+}
+
+@Composable
+fun TodoItemView(todo: TodoItem, alfa: Float, onCheckedChange: (Boolean) -> Unit, onDeleteClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .alpha(alfa)
     ) {
         Checkbox(
-            checked = todo.isCompleted,
+            checked = todo.completed,
             onCheckedChange = onCheckedChange
         )
         Text(
             text = todo.title,
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 8.dp)
+                .padding(start = 8.dp),
+            style = if (todo.completed) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default
         )
         IconButton(onClick = onDeleteClick) {
             Icon(Icons.Default.Delete, contentDescription = "Eliminar")

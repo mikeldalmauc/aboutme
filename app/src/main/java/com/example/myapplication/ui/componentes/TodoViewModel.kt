@@ -9,23 +9,17 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.Date
 
 
-data class TodoItem(  val id: String = ""
-                    , val title: String
-                    , val isCompleted: Boolean = false
-                    , val fechaCompletado: Timestamp? = null) {
-    constructor() : this("", "", false, null)
-    fun copy(id: String) = TodoItem(id, title, isCompleted, fechaCompletado)
+data class TodoItem(
+    val id: String = "",
+    val sortId: Int = 0,
+    val title: String,
+    val completed: Boolean = false,
+    val fechaCompletado: Timestamp? = null
+) {
+    constructor() : this("", 0, "", false, null)
+
+    fun copy(id: String) = TodoItem(id, sortId, title, completed, fechaCompletado)
 }
-
-val docData = hashMapOf(
-    "title" to "Hello world!",
-    "isCompleted" to true,
-    "numberExample" to 3.14159265,
-    "fechaCompletado" to Timestamp(Date()),
-    "listExample" to arrayListOf(1, 2, 3),
-    "nullExample" to null,
-)
-
 
 class TodoViewModel : ViewModel() {
 
@@ -71,14 +65,28 @@ class TodoViewModel : ViewModel() {
     fun addTodo(title: String) {
         Log.i("TodoViewModel", "Adding todo...")
 
-        val newTodo = TodoItem(id = Timestamp.now().toString(), title = title, isCompleted = false,  fechaCompletado = null)
+        val maxSortId = _todoList.value
+            .filter { it.completed.not() }
+            .fold(0) { acc, todo -> maxOf(acc, todo.sortId) }
+
+        val newTodo = TodoItem(
+            id = Timestamp.now().toString(),
+            sortId = maxSortId + 1,
+            title = title,
+            completed = false,
+            fechaCompletado = null
+        )
+
         db.add(newTodo)
     }
 
-    fun updateTodoStatus(todo: TodoItem, isCompleted: Boolean) {
+    fun updateTodoStatus(todo: TodoItem, completed: Boolean) {
         Log.i("TodoViewModel", "Udpate todo...")
 
-        db.document(todo.id).update("isCompleted", isCompleted)
+        when(completed){
+            true -> db.document(todo.id).update("completed", true,"fechaCompletado", Timestamp.now())
+            false -> db.document(todo.id).update("completed", false, "fechaCompletado", null)
+        }
     }
 
     fun deleteTodo(todo: TodoItem) {

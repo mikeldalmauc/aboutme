@@ -36,15 +36,6 @@ fun HomeScreen(innerPadding: PaddingValues, navController: NavController) {
             .fillMaxSize()
             .padding(innerPadding)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 20.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                TodoApp(todoViewModel)
-            }
-        }
+        TodoApp(todoViewModel)
     }
 }
