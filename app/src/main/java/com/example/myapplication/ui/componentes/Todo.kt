@@ -1,6 +1,9 @@
 package com.example.myapplication.ui.componentes
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
@@ -33,65 +37,71 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
+import com.example.myapplication.ui.theme.AppTheme
 
+@Composable
+@Preview
+fun TodoAppPreview(){
+    AppTheme {
+
+    TodoApp(TodoViewModel())
+    }
+}
 @Composable
 fun TodoApp(viewModel: TodoViewModel) {
 
-    val todos: List<TodoItem> by viewModel.todoList.collectAsState()
-    var newTodoTitle by remember { mutableStateOf(TextFieldValue("")) }
+    val todoDone: List<TodoItem> by viewModel.todoDone.collectAsState()
+    val todosNotDone: List<TodoItem> by viewModel.todosNotDone.collectAsState()
 
-    val todosNotDone = todos.filterNot { it.completed }
-    val todoDone = todos.filter { it.completed }
+    var newTodoTitle by remember { mutableStateOf(TextFieldValue("")) }
     var todoDoneExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
-        , horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header para la lista de tareas
-
-            Text(
-                "TODOs",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = 8.dp),
-                fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            "TODOs",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(bottom = 8.dp),
+            fontFamily = MaterialTheme.typography.headlineLarge.fontFamily
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
 
 
         // Input para agregar una nueva tarea
-
-            Row(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp) // Agregado un espacio al final para separar el input de la lista
+        ) {
+            BasicTextField(
+                value = newTodoTitle,
+                onValueChange = { newTodoTitle = it },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp) // Agregado un espacio al final para separar el input de la lista
+                    .weight(1f)
+                    .padding(8.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
+                    .padding(8.dp)
+            )
+            Button(
+                onClick = {
+                    if (newTodoTitle.text.isNotEmpty()) {
+                        viewModel.addTodo(newTodoTitle.text)
+                        newTodoTitle = TextFieldValue("")
+                    }
+                },
+                modifier = Modifier.padding(start = 8.dp)
             ) {
-                BasicTextField(
-                    value = newTodoTitle,
-                    onValueChange = { newTodoTitle = it },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(8.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
-                        .padding(8.dp)
-                )
-                Button(
-                    onClick = {
-                        if (newTodoTitle.text.isNotEmpty()) {
-                            viewModel.addTodo(newTodoTitle.text)
-                            newTodoTitle = TextFieldValue("")
-                        }
-                    },
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Text("Agregar")
-                }
+                Text("Agregar")
             }
+        }
 
 
         // Lista de tareas
@@ -103,7 +113,7 @@ fun TodoApp(viewModel: TodoViewModel) {
                 items = todosNotDone.sortedBy { it.sortId },
                 key = { it.id }
             ) { todo ->
-                TodoItemView(
+                SortableTodoItemView(
                     todo = todo,
                     alfa = 1.0f,
                     onCheckedChange = {
@@ -111,6 +121,12 @@ fun TodoApp(viewModel: TodoViewModel) {
                     },
                     onDeleteClick = {
                         viewModel.deleteTodo(todo)
+                    },
+                    onFloatClick = {
+                        viewModel.floatItem(todo)
+                    },
+                    onSinkClick = {
+                        viewModel.sinkItem(todo)
                     }
                 )
             }
@@ -118,7 +134,8 @@ fun TodoApp(viewModel: TodoViewModel) {
             item {
                 HorizontalDivider()
             }
-            if(todoDoneExpanded){
+            if (todoDoneExpanded) {
+
                 // EXPAND BUTTON
                 item {
                     ToggleExpandButton(
@@ -129,8 +146,7 @@ fun TodoApp(viewModel: TodoViewModel) {
 
                 // DONES LIST
                 items(
-                    items = todoDone.sortedByDescending { it.fechaCompletado }
-                    , key = { it.id }
+                    items = todoDone.sortedByDescending { it.fechaCompletado }, key = { it.id }
                 ) { todo ->
                     TodoItemView(
                         todo = todo,
@@ -143,7 +159,8 @@ fun TodoApp(viewModel: TodoViewModel) {
                         },
                     )
                 }
-            }else{
+            } else {
+
                 // COLLAPSE BUTTON
                 item {
                     ToggleExpandButton(
@@ -160,26 +177,113 @@ fun TodoApp(viewModel: TodoViewModel) {
 
 
 @Composable
-fun ToggleExpandButton(todoDoneExpanded: () -> Unit, id : Int){
+fun ToggleExpandButton(todoDoneExpanded: () -> Unit, id: Int) {
     IconButton(
-        onClick = todoDoneExpanded
-        , modifier = Modifier
+        onClick = todoDoneExpanded, modifier = Modifier
             .padding(2.dp) // Padding del botón
     ) {
         Icon(
-            painter = painterResource(id = id ),
+            painter = painterResource(id = id),
             contentDescription = "Icono para explandir la lista de elementos completados",
             modifier = Modifier
                 .size(24.dp)
                 .alpha(0.6f)
-            , // Tamaño del icono
-            // Centrar el icono dentro del recuadro
         )
     }
 }
 
 @Composable
-fun TodoItemView(todo: TodoItem, alfa: Float, onCheckedChange: (Boolean) -> Unit, onDeleteClick: () -> Unit) {
+fun SortableTodoItemView(
+    todo: TodoItem,
+    alfa: Float,
+    onCheckedChange: (Boolean) -> Unit,
+    onDeleteClick: () -> Unit,
+    onFloatClick: () -> Unit,
+    onSinkClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+            .alpha(alfa)
+    ) {
+        Column (
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(1.dp)
+        )
+        {
+            Box(
+                modifier = Modifier
+                    .size(22.dp) // or your desired button size
+                    .clickable(onClick = onSinkClick)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_keyboard_arrow_up_24),
+                    contentDescription = "Icono para hundir elementos",
+                    modifier = Modifier
+                        .size(22.dp)
+                        .alpha(0.6f)
+                        .align(Alignment.Center)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(27.dp) // or your desired button size
+                    .clickable(onClick = onFloatClick)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Icon(
+                    Icons.Default.Menu,
+                    contentDescription = "Move",
+                    modifier = Modifier
+                        .size(27.dp)
+                        .alpha(0.6f)
+                        .align(Alignment.Center)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .size(22.dp) // or your desired button size
+                    .clickable(onClick = onFloatClick)
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_keyboard_arrow_down_24),
+                    contentDescription = "Icono flotar elementos",
+                    modifier = Modifier
+                        .size(22.dp)
+                        .alpha(0.6f)
+                        .align(Alignment.Center)
+                )
+            }
+        }
+        Checkbox(
+            checked = todo.completed,
+            onCheckedChange = onCheckedChange
+        )
+        Text(
+            text = todo.title,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp),
+            style = if (todo.completed) TextStyle(textDecoration = TextDecoration.LineThrough) else TextStyle.Default
+        )
+        IconButton(onClick = onDeleteClick) {
+            Icon(Icons.Default.Delete, contentDescription = "Eliminar")
+        }
+    }
+}
+
+@Composable
+fun TodoItemView(
+    todo: TodoItem,
+    alfa: Float,
+    onCheckedChange: (Boolean) -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

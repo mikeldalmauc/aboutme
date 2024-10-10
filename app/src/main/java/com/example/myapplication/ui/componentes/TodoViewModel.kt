@@ -6,7 +6,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import java.util.Date
 
 
 data class TodoItem(
@@ -27,6 +26,12 @@ class TodoViewModel : ViewModel() {
 
     private val _todoList = MutableStateFlow<List<TodoItem>>(emptyList())
     val todoList: StateFlow<List<TodoItem>> = _todoList
+
+    private val _todosNotDone = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todosNotDone: StateFlow<List<TodoItem>> = _todosNotDone
+
+    private val _todoDone = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todoDone: StateFlow<List<TodoItem>> = _todoDone
 
     init {
         fetchTodos()
@@ -57,6 +62,9 @@ class TodoViewModel : ViewModel() {
             }
 
             _todoList.value = todos
+            _todosNotDone.value = todos.filterNot { it.completed }
+            _todoDone.value = todos.filter { it.completed }
+
             Log.d("TodoViewModel", "Todo list updated with ${todos.size} items.")
         }
     }
@@ -90,8 +98,35 @@ class TodoViewModel : ViewModel() {
     }
 
     fun deleteTodo(todo: TodoItem) {
-        Log.i("TodoViewModel", "Delete todo...")
+        Log.d("TodoViewModel", "Delete todo...")
 
         db.document(todo.id).delete()
     }
+
+    fun floatItem(item: TodoItem){
+        Log.d("TodoViewModel", "float item ${item.title}, ${item.sortId}")
+
+        val itemIndex = _todosNotDone.value.indexOf(item)
+        val targetItem = _todosNotDone.value.elementAtOrElse(itemIndex - 1) { item }
+        swapItemPosition(item, targetItem)
+    }
+
+    fun sinkItem(item: TodoItem){
+        Log.d("TodoViewModel", "sink item ${item.title}, ${item.sortId}")
+
+        val itemIndex = _todosNotDone.value.indexOf(item)
+        val targetItem = _todosNotDone.value.elementAtOrElse(itemIndex + 1) { item }
+        swapItemPosition(item, targetItem)
+    }
+
+    fun swapItemPosition(originItem: TodoItem, targetItem: TodoItem){
+        Log.d("TodoViewModel", "Swap items ${originItem.title}, ${originItem.sortId}  by ${targetItem.title}, ${targetItem.sortId}")
+
+        if(originItem != targetItem){
+            db.document(originItem.id).update("sortId", targetItem.sortId)
+            db.document(targetItem.id).update("sortId", originItem.sortId)
+        }
+        fetchTodos()
+    }
+
 }
